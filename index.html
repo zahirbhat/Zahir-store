@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Zahir Store – Online Shopping</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{margin:0;font-family:Arial;background:#f4f4f4}
+header{background:#6a0dad;color:#fff;padding:15px;text-align:center}
+nav button{margin:5px;padding:8px 12px;border:none;border-radius:5px;cursor:pointer}
+.container{padding:15px}
+.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px}
+.product{background:#fff;padding:10px;border-radius:8px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.1)}
+.product img{width:100%;height:160px;object-fit:cover;border-radius:5px}
+.product button{background:#25D366;color:#fff;border:none;padding:8px 12px;border-radius:5px;cursor:pointer}
+.admin{display:none}
+input,textarea{width:100%;padding:8px;margin:5px 0}
+.admin-card{background:#fff;padding:15px;border-radius:8px}
+footer{background:#222;color:#fff;text-align:center;padding:10px;margin-top:20px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Zahir Store</h1>
+  <p>Affordable Online Shopping</p>
+  <nav>
+    <button onclick="showStore()">Store</button>
+    <button onclick="showAdmin()">Admin</button>
+  </nav>
+</header>
+
+<div class="container">
+
+<!-- STORE -->
+<div id="store">
+  <h2>Products</h2>
+  <div class="products" id="productList"></div>
+</div>
+
+<!-- ADMIN -->
+<div id="admin" class="admin">
+  <div class="admin-card">
+    <h2>Admin Dashboard</h2>
+    <input id="name" placeholder="Product Name">
+    <input id="price" placeholder="Price">
+    <input id="image" placeholder="Image URL">
+    <textarea id="desc" placeholder="Description"></textarea>
+    <button onclick="addProduct()">Add Product</button>
+    <hr>
+    <h3>Manage Products</h3>
+    <div id="adminProducts"></div>
+  </div>
+</div>
+
+</div>
+
+<footer>
+  <p>© 2025 Zahir Store | WhatsApp Orders Only</p>
+</footer>
+
+<script>
+const phone = "8899856684";
+
+let products = JSON.parse(localStorage.getItem("products")) || [
+  {name:"Men T-Shirt",price:"399",img:"https://via.placeholder.com/300",desc:"Comfortable cotton T-shirt"},
+  {name:"Women Dress",price:"699",img:"https://via.placeholder.com/300",desc:"Stylish women dress"},
+  {name:"Smart Watch",price:"1299",img:"https://via.placeholder.com/300",desc:"Bluetooth smart watch"},
+  {name:"Shoes",price:"999",img:"https://via.placeholder.com/300",desc:"Running shoes"},
+  {name:"Handbag",price:"549",img:"https://via.placeholder.com/300",desc:"Ladies handbag"},
+  {name:"Earbuds",price:"899",img:"https://via.placeholder.com/300",desc:"Wireless earbuds"}
+];
+
+function save(){
+  localStorage.setItem("products",JSON.stringify(products));
+  render();
+}
+
+function render(){
+  let list="";
+  let admin="";
+  products.forEach((p,i)=>{
+    const msg = `Hello, I want to order:\n${p.name}\nPrice: ₹${p.price}`;
+    list+=`
+      <div class="product">
+        <img src="${p.img}">
+        <h3>${p.name}</h3>
+        <p>₹${p.price}</p>
+        <p>${p.desc}</p>
+        <button onclick="window.open('https://wa.me/91${phone}?text=${encodeURIComponent(msg)}')">Buy on WhatsApp</button>
+      </div>`;
+    admin+=`
+      <p>${p.name} - ₹${p.price}
+      <button onclick="del(${i})">❌</button></p>`;
+  });
+  document.getElementById("productList").innerHTML=list;
+  document.getElementById("adminProducts").innerHTML=admin;
+}
+
+function addProduct(){
+  products.push({
+    name:name.value,
+    price:price.value,
+    img:image.value,
+    desc:desc.value
+  });
+  name.value=price.value=image.value=desc.value="";
+  save();
+}
+
+function del(i){
+  products.splice(i,1);
+  save();
+}
+
+function showAdmin(){
+  document.getElementById("store").style.display="none";
+  document.getElementById("admin").style.display="block";
+}
+function showStore(){
+  document.getElementById("store").style.display="block";
+  document.getElementById("admin").style.display="none";
+}
+
+render();
+</script>
+
+</body>
+</html>
