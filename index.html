@@ -2,127 +2,180 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Zahir Store – Online Shopping</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zahi 🛒 NEET Store</title>
 <style>
-body{margin:0;font-family:Arial;background:#f4f4f4}
-header{background:#6a0dad;color:#fff;padding:15px;text-align:center}
-nav button{margin:5px;padding:8px 12px;border:none;border-radius:5px;cursor:pointer}
-.container{padding:15px}
-.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px}
-.product{background:#fff;padding:10px;border-radius:8px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.1)}
-.product img{width:100%;height:160px;object-fit:cover;border-radius:5px}
-.product button{background:#25D366;color:#fff;border:none;padding:8px 12px;border-radius:5px;cursor:pointer}
-.admin{display:none}
-input,textarea{width:100%;padding:8px;margin:5px 0}
-.admin-card{background:#fff;padding:15px;border-radius:8px}
-footer{background:#222;color:#fff;text-align:center;padding:10px;margin-top:20px}
+body{margin:0;font-family:Arial;background:#f9f9f9}
+header{background:linear-gradient(45deg,#ff5722,#673ab7);color:white;padding:15px;text-align:center;position:sticky;top:0;z-index:100}
+header h1{margin:0;font-size:28px}
+header p{margin:5px;font-size:14px;color:#ffd700}
+#searchBar{padding:8px;width:80%;margin:5px;border-radius:5px;border:1px solid #ccc}
+nav{background:#2196f3;padding:10px;text-align:center}
+nav button{margin:5px;padding:10px;border:none;border-radius:5px;cursor:pointer;background:white;color:#2196f3;font-weight:bold}
+.card{background:white;margin:15px;padding:15px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+img{width:100%;border-radius:10px}
+button.buy{background:#25D366;color:white;width:100%;padding:10px;margin-top:6px;border:none;border-radius:6px;font-weight:bold}
+button.cartBtn{background:#ff9800;color:white;width:100%;padding:10px;margin-top:6px;border:none;border-radius:6px;font-weight:bold}
+button.save{background:#03a9f4;color:white;width:100%;padding:10px;margin-top:6px;border:none;border-radius:6px;font-weight:bold}
+button.adminBtn{background:black;color:white;padding:10px;width:100%;border:none;border-radius:6px;margin:15px 0;font-weight:bold}
+.hidden{display:none}
+input{width:100%;padding:8px;margin:5px 0;border-radius:5px;border:1px solid #ccc}
+footer{text-align:center;color:#555;margin:20px}
+.badge{background:red;color:white;padding:3px 8px;border-radius:50%;font-size:12px}
 </style>
 </head>
 <body>
 
 <header>
-  <h1>Zahir Store</h1>
-  <p>Affordable Online Shopping</p>
-  <nav>
-    <button onclick="showStore()">Store</button>
-    <button onclick="showAdmin()">Admin</button>
-  </nav>
+<h1>Zahi 🛒</h1>
+<p>NEET Student Store | Categories & Notes</p>
+<input id="searchBar" placeholder="Search products..." onkeyup="searchProducts()">
+<p>Cart Items: <span id="cartCount" class="badge">0</span></p>
 </header>
 
-<div class="container">
+<nav id="categoriesNav"></nav>
 
-<!-- STORE -->
-<div id="store">
-  <h2>Products</h2>
-  <div class="products" id="productList"></div>
+<!-- Products Section -->
+<div id="products"></div>
+
+<!-- Cart -->
+<div class="card hidden" id="cartBox">
+<h3>🛒 Your Cart</h3>
+<div id="cartItems"></div>
+<button class="buy" onclick="checkout()">Checkout on WhatsApp</button>
 </div>
 
-<!-- ADMIN -->
-<div id="admin" class="admin">
-  <div class="admin-card">
-    <h2>Admin Dashboard</h2>
-    <input id="name" placeholder="Product Name">
-    <input id="price" placeholder="Price">
-    <input id="image" placeholder="Image URL">
-    <textarea id="desc" placeholder="Description"></textarea>
-    <button onclick="addProduct()">Add Product</button>
-    <hr>
-    <h3>Manage Products</h3>
-    <div id="adminProducts"></div>
-  </div>
+<!-- Wishlist -->
+<div class="card hidden" id="wishlistBox">
+<h3>❤️ Wishlist</h3>
+<div id="wishlistItems"></div>
 </div>
 
+<!-- Admin Panel -->
+<button class="adminBtn" onclick="toggleAdmin()">🔐 Admin Panel</button>
+<div class="card hidden" id="adminPanel">
+<h3>Admin Panel</h3>
+<input id="pname" placeholder="Product Name">
+<input id="pprice" placeholder="Price">
+<input id="pimg" placeholder="Image URL">
+<input id="pcategory" placeholder="Category">
+<button onclick="addProduct()">Add Product</button>
 </div>
 
-<footer>
-  <p>© 2025 Zahir Store | WhatsApp Orders Only</p>
-</footer>
+<footer>© 2026 Zahi Store</footer>
 
 <script>
-const phone = "8899856684";
-
+// ================== DATA ==================
+let categories = ["Notes","Books","Courses"];
 let products = JSON.parse(localStorage.getItem("products")) || [
-  {name:"Men T-Shirt",price:"399",img:"https://via.placeholder.com/300",desc:"Comfortable cotton T-shirt"},
-  {name:"Women Dress",price:"699",img:"https://via.placeholder.com/300",desc:"Stylish women dress"},
-  {name:"Smart Watch",price:"1299",img:"https://via.placeholder.com/300",desc:"Bluetooth smart watch"},
-  {name:"Shoes",price:"999",img:"https://via.placeholder.com/300",desc:"Running shoes"},
-  {name:"Handbag",price:"549",img:"https://via.placeholder.com/300",desc:"Ladies handbag"},
-  {name:"Earbuds",price:"899",img:"https://via.placeholder.com/300",desc:"Wireless earbuds"}
+    {id:1,name:"NEET Biology Notes",price:"₹299",category:"Notes",img:"https://upload.wikimedia.org/wikipedia/commons/3/3a/Android_logo_2019.png"},
+    {id:2,name:"NEET Chemistry Guide",price:"₹399",category:"Notes",img:"https://upload.wikimedia.org/wikipedia/commons/4/4e/Headphones_Icon.svg"},
+    {id:3,name:"Physics Crash Course",price:"₹499",category:"Courses",img:"https://upload.wikimedia.org/wikipedia/commons/7/70/Physics_icon.png"},
+    {id:4,name:"Organic Chemistry Book",price:"₹599",category:"Books",img:"https://upload.wikimedia.org/wikipedia/commons/1/1a/Book_icon.svg"}
 ];
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+let wishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
 
-function save(){
-  localStorage.setItem("products",JSON.stringify(products));
-  render();
+// ================== INIT ==================
+function init(){
+    renderCategoriesNav();
+    renderProducts(products);
+    renderCart();
+    renderWishlist();
+}
+init();
+
+// ================== CATEGORIES NAV ==================
+function renderCategoriesNav(){
+    let html="";
+    categories.forEach(cat=>{
+        html+=`<button onclick="filterCategory('${cat}')">${cat}</button>`;
+    });
+    document.getElementById("categoriesNav").innerHTML=html;
 }
 
-function render(){
-  let list="";
-  let admin="";
-  products.forEach((p,i)=>{
-    const msg = `Hello, I want to order:\n${p.name}\nPrice: ₹${p.price}`;
-    list+=`
-      <div class="product">
-        <img src="${p.img}">
-        <h3>${p.name}</h3>
-        <p>₹${p.price}</p>
-        <p>${p.desc}</p>
-        <button onclick="window.open('https://wa.me/91${phone}?text=${encodeURIComponent(msg)}')">Buy on WhatsApp</button>
-      </div>`;
-    admin+=`
-      <p>${p.name} - ₹${p.price}
-      <button onclick="del(${i})">❌</button></p>`;
-  });
-  document.getElementById("productList").innerHTML=list;
-  document.getElementById("adminProducts").innerHTML=admin;
+function filterCategory(cat){
+    let filtered = products.filter(p=>p.category===cat);
+    renderProducts(filtered);
+}
+
+// ================== SEARCH ==================
+function searchProducts(){
+    let query = document.getElementById("searchBar").value.toLowerCase();
+    let filtered = products.filter(p=>p.name.toLowerCase().includes(query));
+    renderProducts(filtered);
+}
+
+// ================== PRODUCTS ==================
+function renderProducts(list){
+    let html="";
+    list.forEach(p=>{
+        html+=`<div class="card">
+            <img src="${p.img}">
+            <h3>${p.name}</h3>
+            <p>${p.price}</p>
+            <button class="cartBtn" onclick="addCart(${p.id})">Add to Cart</button>
+            <button class="buy" onclick="buy('${p.name}','${p.price}')">Buy on WhatsApp</button>
+            <button class="save" onclick="addWishlist(${p.id})">❤️ Save</button>
+        </div>`;
+    });
+    document.getElementById("products").innerHTML=html;
+}
+
+// ================== CART ==================
+function addCart(id){
+    let p = products.find(p=>p.id===id);
+    cart.push(p);
+    localStorage.setItem("cart",JSON.stringify(cart));
+    renderCart();
+}
+
+function renderCart(){
+    if(cart.length>0) document.getElementById("cartBox").classList.remove("hidden");
+    let html="";
+    cart.forEach(p=> html+=`<p>${p.name} - ${p.price}</p>`);
+    document.getElementById("cartItems").innerHTML=html;
+    document.getElementById("cartCount").innerText=cart.length;
+}
+
+function checkout(){
+    let text="I want to buy:\n";
+    cart.forEach(p=> text+=`${p.name} - ${p.price}\n`);
+    window.open("https://wa.me/918899856684?text="+encodeURIComponent(text));
+}
+
+// ================== WISHLIST ==================
+function addWishlist(id){
+    let p = products.find(p=>p.id===id);
+    if(!wishlist.find(w=>w.id===id)) wishlist.push(p);
+    localStorage.setItem("wishlist",JSON.stringify(wishlist));
+    renderWishlist();
+}
+
+function renderWishlist(){
+    if(wishlist.length>0) document.getElementById("wishlistBox").classList.remove("hidden");
+    let html="";
+    wishlist.forEach(p=> html+=`<p>${p.name} - ${p.price}</p>`);
+    document.getElementById("wishlistItems").innerHTML=html;
+}
+
+// ================== ADMIN ==================
+function toggleAdmin(){
+    document.getElementById("adminPanel").classList.toggle("hidden");
 }
 
 function addProduct(){
-  products.push({
-    name:name.value,
-    price:price.value,
-    img:image.value,
-    desc:desc.value
-  });
-  name.value=price.value=image.value=desc.value="";
-  save();
+    let p = {
+        id:products.length+1,
+        name:document.getElementById("pname").value,
+        price:document.getElementById("pprice").value,
+        img:document.getElementById("pimg").value,
+        category:document.getElementById("pcategory").value
+    };
+    products.push(p);
+    localStorage.setItem("products",JSON.stringify(products));
+    renderProducts(products);
+    alert("Product added!");
 }
-
-function del(i){
-  products.splice(i,1);
-  save();
-}
-
-function showAdmin(){
-  document.getElementById("store").style.display="none";
-  document.getElementById("admin").style.display="block";
-}
-function showStore(){
-  document.getElementById("store").style.display="block";
-  document.getElementById("admin").style.display="none";
-}
-
-render();
 </script>
 
 </body>
